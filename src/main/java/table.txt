@@ -1,0 +1,70 @@
+CREATE TABLE PRODUCT(
+	PROD_ID INT PRIMARY KEY AUTO_INCREMENT, ## PK (자동증가값)
+	PROD_REGDATE TIMESTAMP DEFAULT NOW(), ## 등록일 (기본값 시간형)
+	PROD_ENDDATE VARCHAR(20), ## 판매종료일 (문자형 시간)
+	PROD_CATEGORY VARCHAR(20), ## 카테고리 키
+	PROD_WRITER VARCHAR(20), ## 작성자 FK
+	PROD_NAME VARCHAR(300), ## 상품명
+	PROD_PRICE INT NOT NULL, ## 가격
+	PROD_COUNT INT NOT NULL, ## 재고
+	PROD_DISCOUNT INT DEFAULT 0, ## 할인율 (기본값 숫자 0)
+	PROD_PURCHASE_YN CHAR(1) DEFAULT 'N' CHECK (PROD_PURCHASE_YN IN ('Y', 'N')), ##체크제약
+	PROD_CONTENT VARCHAR(5000), ##내용
+	PROD_COMMENT VARCHAR(5000) ##메모
+);
+
+
+# SELECT * FROM PRODUCT WHERE PROD_WRITER = 'admin' limit 11, 20;
+
+###################################### MYSQL은 서브쿼리절에 테이블 엘리어스가 필요
+SELECT *
+FROM (SELECT A.*,
+			 @ROWNUM := @ROWNUM + 1 AS RN #ROWNUM변수 + 1로 RN으로 사용
+		FROM (SELECT *
+				FROM PRODUCT
+				WHERE PROD_WRITER = 'admin'
+				ORDER BY PROD_ID DESC) A, (SELECT @ROWNUM := 0) D #ROWNUM변수 초기화
+) B
+WHERE RN > 10 AND RN <= 20;
+
+###################################### 카테고리 조인 테이블
+SELECT *
+FROM (SELECT A.*,
+				 @ROWNUM := @ROWNUM + 1 AS RN #ROWNUM변수 + 1로 RN으로 사용
+			FROM (SELECT *
+					FROM PRODUCT
+					WHERE PROD_WRITER = 'admin'
+					ORDER BY PROD_ID DESC) A, (SELECT @ROWNUM := 0) D #ROWNUM변수 초기화
+) B 
+LEFT OUTER JOIN (
+				SELECT CONCAT(A1.group_ID, A1.CATEGORY_ID) AS CATEGORY_KEY, ##카테고리 키 (그룹 + 키 형태로 카테고리분류)
+					   CASE A1.category_parent_LV
+							WHEN 0 THEN A1.category_detail_NM
+							WHEN 1 THEN CONCAT(A2.category_detail_NM,' > ', A1.category_detail_NM)
+							WHEN 2 THEN CONCAT(A3.category_detail_NM, ' > ', A2.category_detail_NM,' > ', A1.category_detail_NM)
+					   END as CATEGORY_NAV
+				FROM PRODUCT_CATEGORY A1
+				LEFT OUTER JOIN PRODUCT_CATEGORY A2
+				ON A1.CATEGORY_PARENT_LV = A2.CATEGORY_LV AND A1.CATEGORY_DETAIL_PARENT_LV = A2.CATEGORY_DETAIL_LV AND A1.GROUP_ID = A2.GROUP_ID
+				LEFT OUTER JOIN PRODUCT_CATEGORY A3
+				ON A2.CATEGORY_PARENT_LV = A3.CATEGORY_LV AND A2.CATEGORY_DETAIL_PARENT_LV = A3.CATEGORY_DETAIL_LV
+				ORDER BY CATEGORY_NAV ASC
+) C
+ON B.PROD_CATEGORY = C.CATEGORY_KEY   
+WHERE RN > 0 AND RN <= 10;
+
+
+
+############################상품 업로드 ###############################
+CREATE TABLE PRODUCT_UPLOAD(
+	UPLOAD_NO INT PRIMARY KEY AUTO_INCREMENT, # PK
+    FILENAME VARCHAR(100) NOT NULL, #실제 파일명
+    FILEPATH VARCHAR(100) NOT NULL, #220407형태의 폴더명
+    UUID VARCHAR(50) NOT NULL, 		#파일이름앞에 들어가는 랜덤값
+    REGDATE TIMESTAMP DEFAULT NOW(),
+    PROD_ID INT, ## FK
+    PROD_WRITER VARCHAR(20) ##FK(편의성을 위한 FK)
+);
+
+
+

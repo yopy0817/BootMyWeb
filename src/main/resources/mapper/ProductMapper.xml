@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.coding404.myweb.product.ProductMapper">
+	<!-- 테이블 명은 대문자(mysql은 대소문자를 구분함) -->
+	<insert id="regist">
+		insert into PRODUCT(prod_enddate,
+							prod_category,
+							prod_writer,
+							prod_name,
+							prod_price,
+							prod_count,
+							prod_discount,
+							prod_purchase_yn,
+							prod_content,
+							prod_comment)
+		values(#{prod_enddate},
+			   #{prod_category},
+			   #{prod_writer},
+			   #{prod_name},
+			   #{prod_price},
+			   #{prod_count},
+			   #{prod_discount},
+			   #{prod_purchase_yn},
+			   #{prod_content},
+			   #{prod_comment}
+			   )						
+	</insert>
+	
+	<!-- 예시 사용자 admin으로 사용 -->
+	<select id="getList" resultType="ProductVO">
+		<!-- 1ST 
+		select * from PRODUCT 
+		where prod_writer = 'admin'
+		order by prod_id desc
+		 -->
+		
+		<![CDATA[
+		SELECT *
+		FROM (SELECT A.*,
+					 @ROWNUM := @ROWNUM + 1 AS RN
+				FROM (SELECT *
+						FROM PRODUCT
+						WHERE PROD_WRITER = 'admin'
+		]]>				
+						<if test="startDate != '' and startDate != null">
+						<![CDATA[AND DATE_FORMAT(PROD_ENDDATE, '%Y-%m-%d') > DATE_FORMAT( #{startDate} , '%Y-%m-%d')]]>	
+		               	</if>
+		               	<if test="endDate != '' and endDate != null">
+		                <![CDATA[AND DATE_FORMAT(PROD_ENDDATE, '%Y-%m-%d') <= DATE_FORMAT(#{endDate} , '%Y-%m-%d')]]>	
+		                </if>
+		                <if test="searchName != '' and searchName != null">
+		                AND PROD_NAME LIKE CONCAT('%', #{searchName}, '%')
+		                </if>
+		                <if test="searchContent != '' and searchContent != null">
+		                AND PROD_CONTENT LIKE CONCAT('%', #{searchContent}, '%')
+		                </if>
+						ORDER BY 
+						<if test="searchPrice == 'desc' ">
+						PROD_PRICE DESC, 
+						</if>
+						<if test="searchPrice == 'asc' ">
+						PROD_PRICE ASC,
+						</if>
+						PROD_ID DESC) A, (SELECT @ROWNUM := 0) D 
+				
+				
+				
+		<![CDATA[   		
+		) B
+		LEFT OUTER JOIN (
+				SELECT CONCAT(A1.group_ID, A1.CATEGORY_ID) AS CATEGORY_KEY, ##카테고리 키 (그룹 + 키 형태로 카테고리분류)
+					   CASE A1.category_parent_LV
+							WHEN 0 THEN A1.category_detail_NM
+							WHEN 1 THEN CONCAT(A2.category_detail_NM,' > ', A1.category_detail_NM)
+							WHEN 2 THEN CONCAT(A3.category_detail_NM, ' > ', A2.category_detail_NM,' > ', A1.category_detail_NM)
+					   END as CATEGORY_NAV
+				FROM PRODUCT_CATEGORY A1
+				LEFT OUTER JOIN PRODUCT_CATEGORY A2
+				ON A1.CATEGORY_PARENT_LV = A2.CATEGORY_LV AND A1.CATEGORY_DETAIL_PARENT_LV = A2.CATEGORY_DETAIL_LV AND A1.GROUP_ID = A2.GROUP_ID
+				LEFT OUTER JOIN PRODUCT_CATEGORY A3
+				ON A2.CATEGORY_PARENT_LV = A3.CATEGORY_LV AND A2.CATEGORY_DETAIL_PARENT_LV = A3.CATEGORY_DETAIL_LV
+				ORDER BY CATEGORY_NAV ASC
+		) C
+		ON B.PROD_CATEGORY = C.CATEGORY_KEY
+		
+		WHERE RN > (#{page}-1) * #{amount} AND RN <= #{page} * #{amount}
+		]]>
+		
+		 
+	</select>
+	
+	<select id="getTotal" resultType="int">
+	SELECT COUNT(*) AS TOTAL
+	FROM PRODUCT
+	WHERE prod_writer = 'admin'
+	<if test="startDate != '' and startDate != null">
+		<![CDATA[AND DATE_FORMAT(PROD_ENDDATE, '%Y-%m-%d') > DATE_FORMAT( #{startDate} , '%Y-%m-%d')]]>
+	</if>
+	<if test="endDate != '' and endDate != null">
+		<![CDATA[AND DATE_FORMAT(PROD_ENDDATE, '%Y-%m-%d') <= DATE_FORMAT(#{endDate} , '%Y-%m-%d')]]>
+	</if>
+	<if test="searchName != '' and searchName != null">
+		AND PROD_NAME LIKE CONCAT('%', #{searchName}, '%')
+	</if>
+	<if test="searchContent != '' and searchContent != null">
+		AND PROD_CONTENT LIKE CONCAT('%', #{searchContent}, '%')
+	</if>
+	</select>
+	
+	
+	
+	
+	<select id="getDetail" resultType="ProductVO">
+		select * from PRODUCT A
+		LEFT OUTER JOIN (
+				SELECT CONCAT(A1.group_ID, A1.CATEGORY_ID) AS CATEGORY_KEY, ##카테고리 키 (그룹 + 키 형태로 카테고리분류)
+					   CASE A1.category_parent_LV
+							WHEN 0 THEN A1.category_detail_NM
+							WHEN 1 THEN CONCAT(A2.category_detail_NM,' > ', A1.category_detail_NM)
+							WHEN 2 THEN CONCAT(A3.category_detail_NM, ' > ', A2.category_detail_NM,' > ', A1.category_detail_NM)
+					   END as CATEGORY_NAV
+				FROM PRODUCT_CATEGORY A1
+				LEFT OUTER JOIN PRODUCT_CATEGORY A2
+				ON A1.CATEGORY_PARENT_LV = A2.CATEGORY_LV AND A1.CATEGORY_DETAIL_PARENT_LV = A2.CATEGORY_DETAIL_LV AND A1.GROUP_ID = A2.GROUP_ID
+				LEFT OUTER JOIN PRODUCT_CATEGORY A3
+				ON A2.CATEGORY_PARENT_LV = A3.CATEGORY_LV AND A2.CATEGORY_DETAIL_PARENT_LV = A3.CATEGORY_DETAIL_LV
+				ORDER BY CATEGORY_NAV ASC
+		) B
+		ON A.PROD_CATEGORY = B.CATEGORY_KEY
+		
+		where prod_id = #{prod_id}
+	</select>
+	
+	
+	<update id="update">
+		update PRODUCT
+		set prod_enddate = #{prod_enddate},
+			prod_name = #{prod_name},
+			prod_price = #{prod_price},
+			prod_count = #{prod_count},
+			prod_discount = #{prod_discount},
+			prod_purchase_yn = #{prod_purchase_yn},
+			prod_content = #{prod_content},
+			prod_comment = #{prod_comment}
+		where prod_id = #{prod_id}
+	</update>
+	
+	
+	<delete id="delete">
+		delete from PRODUCT 
+		where prod_id = #{prod_id}
+	</delete>
+	
+	
+	<!-- 첫번째 카테고리 ajax방식 -->
+	<select id="getCategory" resultType="CategoryVO">
+		SELECT * FROM PRODUCT_CATEGORY WHERE CATEGORY_LV = 1
+	</select>
+	
+	
+	<select id="getCategoryChild" resultType="CategoryVO">
+		SELECT *
+		FROM PRODUCT_CATEGORY
+		WHERE GROUP_ID = #{group_id}
+		AND CATEGORY_PARENT_LV = #{category_lv}
+		AND CATEGORY_DETAIL_PARENT_LV = #{category_detail_lv}
+		
+		
+	</select>
+	
+	
+	<!-- ##############파일 업로드 기능############### -->
+	<!-- 
+	파일 insert전에 prod_id가 반드시 필요합니다.
+	selectKey를 이용해서 insert직전에 필요한 키값을 vo에 저장할 수 있습니다.
+	
+	resultType =셀렉트 키의 반환타입
+	order =before, after가 있습니다.
+	keyProperty=조회한 결과를 저장할 vo의 변수명
+	
+	#전제조건
+	selectKey를 통해서 나오는 데이터의 row는 무조건 1개여야 합니다.
+	insert태그의 매개변수로 키를 반환받을 vo가 있어야 합니다.
+	
+	 -->
+	<insert id="registFile">
+		
+		<selectKey resultType="int" order="BEFORE" keyProperty="prod_id" >
+			select max(prod_id) as prod_id from PRODUCT where prod_writer = #{prod_writer}
+		</selectKey>
+		
+		INSERT INTO PRODUCT_UPLOAD(
+				filename,
+				filepath,
+				uuid,
+				prod_id,
+				prod_writer 
+				)
+		VALUES(#{filename},
+			   #{filepath},
+			   #{uuid},
+			   #{prod_id},
+			   #{prod_writer}
+			   )	
+			   
+		
+	</insert>
+	
+	
+	<!-- 이미지 정보 조회 -->
+	<select id="getDetailImg" resultType="ProductUploadVO">
+		SELECT * FROM PRODUCT_UPLOAD WHERE PROD_ID = #{prod_id}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

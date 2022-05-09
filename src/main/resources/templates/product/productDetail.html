@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	
+<th:block th:replace="~{/include/basicLayout :: setContent( ~{:: .wrap} ) }">
+
+    <div class="wrap">
+        <div class="warp_inner">
+            <!-- left_menu end -->
+            <div class="right_content">
+                <div class="midiaq">
+                    <div class="page_title">상품 관리 > <span class="page_subtitle">상품 상세/수정</span></div>
+                    <form name="prodUpdate" action="####" method="post">
+                        <div class="full_collum collum">
+                            <ul>
+                                <li class="collum_tit">
+                                    <h2>상품 상세/수정</h2>
+                                    <a href="#">버튼01</a>
+                                    <a href="#">버튼02</a>
+                                    <span class="showtoggle minus"></span>
+                                    <ul>
+                                        <li>
+                                            <table class="board_basic_view">
+                                                <tbody>
+                                                    <tr>
+														<th>상품번호</th>
+														<td><input type="hidden" name="prod_id" th:value="${prodVO.prod_id}">[[${prodVO.prod_id}]]</td>
+													</tr>
+                                                    <tr>
+                                                        <th>판매종료일</th>
+                                                        <td><input type="text" class="datepicker" name="prod_enddate" th:value="${prodVO.prod_enddate}"  placeholder="날짜선택">
+                                                        	<span class="valid">[[${valid_prod_enddate}]]</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>카테고리</th>
+
+                                                        <td colspan="5">
+                                                            <div>수정이 불가능한 옵션입니다(상품관리자에게 문의하세요)</div>
+                                                            [[${prodVO.category_nav == null or prodVO.category_nav == '' ? '없음' : prodVO.category_nav }]]
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>등록자ID</th>
+                                                        <td><input type="text" name="prod_writer" th:value="${prodVO.prod_writer}" readonly />
+                                                        	<span class="valid">[[${valid_prod_writer}]]</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">제목(상품명)</th>
+                                                        <td><input class="inputw99p margin_center" type="text" name="prod_name" th:value="${prodVO.prod_name}">
+                                                        	<span class="valid">[[${valid_prod_name}]]</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>메인사진</th>
+                                                        <td colspan="3">
+                                                            <!--미리보기 폼-->
+                                                            <!-- 
+                                                            1. src에 경로에 서버측에서 조회된 이미지정보를 display?키=값 형태로 표기
+                                                            2. rest서버에서 이미지 경로 참조 맵핑을 만든다.
+                                                             -->
+                                                            [[${prodImg}]]
+                                                            
+                                                            <div class="blockContent">
+                                                                <div class="productText">이미지 수정은 목록을 이용해주세요</div>
+                                                                <div class="productImg">
+                                                                	
+                                                                	<th:block th:each="imgs : ${prodImg}">
+                                                                    <div class="imgItem">
+                                                                        <span class="imgKind">대표이미지</span>
+                                                                        <div class="imgWrap">
+                                                                            <div class="imgArea">
+                                                                                <img th:src="@{../display( filepath=${imgs.filepath}, uuid=${imgs.uuid}, filename=${imgs.filename}) }">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    </th:block>
+                                                                    
+                                                                    <!-- 
+                                                                    <div class="imgItem">
+                                                                        <span class="imgKind">배너이미지</span>
+                                                                        <div class="imgWrap">
+                                                                            <div class="imgArea">
+                                                                                <img src="../img/item_banner.jpg">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="imgItem">
+                                                                        <span class="imgKind">배너이미지</span>
+                                                                        <div class="imgWrap">
+                                                                            <div class="imgArea">
+                                                                                <img src="../img/item_banner.jpg">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="imgItem">
+                                                                        <span class="imgKind">배너이미지</span>
+                                                                        <div class="imgWrap">
+                                                                            <div class="imgArea">
+                                                                                <img src="../img/item_banner.jpg">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                     -->
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>판매가</th>
+                                                        <td colspan="3">
+                                                        	<input type="text" class="inputw150" name="prod_price" th:value="${prodVO.prod_price}" placeholder="3000">원
+                                                        	<span class="valid">[[${valid_prod_price}]]</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>판매수량</th>
+                                                        <td colspan="3">
+                                                        	<input type="text" class="inputw150" name="prod_count" th:value="${prodVO.prod_count}" placeholder="숫자로 입력">개
+                                                        	<span class="valid">[[${valid_prod_count}]]</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>할인율</th>
+                                                        <td colspan="3">
+                                                        	<input type="text" class="inputw150" name="prod_discount" th:value="${prodVO.prod_discount}" placeholder="15(숫자로 입력)">%
+                                                        	<span class="valid">[[${valid_prod_discount}]]</span>
+                                                        </td>
+                                                    </tr>
+               
+                                                    <!-- 타임리프에서는 th:checked="true" 로 처리되면 미리 선택됩니다 -->
+                                                    <tr>
+                                                        <th>상품 구매 제한</th>
+                                                        <td colspan="3">
+                                                            <div class="uInputRadioBox">
+                                                                <div class="uInputRadio">
+                                                                    <label>
+                                                                        <input type="radio" name="prod_purchase_yn" value="N" th:checked="${prodVO.prod_purchase_yn == 'N' }" >
+                                                                        <span class="text">제한안함</span>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="uInputRadio">
+                                                                    <label>
+                                                                        <input type="radio" name="prod_purchase_yn" value="Y" th:checked="${prodVO.prod_purchase_yn == 'Y' }" >
+                                                                        <span class="text">1회 제한</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+
+                                                    <tr>
+                                                        <th>설명</th>
+                                                        <td colspan="5">
+                                                            <div>
+                                                            	<span class="valid">[[${valid_prod_content}]]</span>
+                                                            	<textarea class="inputw99p" name="prod_content" style="height: 200px;">[[${prodVO.prod_content}]]</textarea>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+
+                                                    <tr>
+                                                        <th>커맨트 내용</th>
+                                                        <td colspan="5">
+                                                            <div>
+                                                                <textarea class="inputw99p" name="prod_comment" style="height: 200px;">[[${prodVO.prod_comment}]]</textarea>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+
+											<!-- 
+											JS를 이용해서 유효성검사, 서버측에서 유효성검사 두가지 작업을 동시 수행합니다.
+											
+											타임리프에서 인라인방식으로 JS연결할떄
+											th:onclick="|함수명()|"
+											
+											
+											삭제, 수정은 하나의 폼을 이용해서 처리합니다.
+											JS를 실행시켜서 action을 제어하여 삭제합니다.
+											 -->
+											
+                                            <div class="btn_area">
+                                                <a th:href="@{수정JS}" class="save" th:onclick="|prod_valid()|" >저장</a>
+                                                <a th:href="@{/product/productList}" class="revise">목록</a>
+                                                <a th:href="@{삭제JS}" class="delete" th:onclick="|prod_delete()|">삭제</a>
+                                            </div>
+
+
+
+                                        </li>
+                                    </ul>
+                                </li>
+
+
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- right_content end -->
+        </div>
+        <div class="dim_layer">
+        </div>
+    </div>
+</th:block>
+
+<script th:inline="javascript">
+	function prod_valid() {
+		//고유이벤트 중지
+		this.event.preventDefault(); 
+		/*
+		var a = document.prodUpdate.prod_enddate;
+		var b = document.prodUpdate.prod_writer; //도큐먼트.폼이름.인풋이름
+		var c = document.prodUpdate.prod_name;
+		var d = document.prodUpdate.prod_price;
+		var e = document.prodUpdate.prod_count;
+		var f = document.prodUpdate.prod_discount;
+		var g = document.prodUpdate.prod_content;
+		
+		var arr = [a, b, c, d, e, f, g];
+		
+		for(var i = 0; i < arr.length; i++) {
+			
+			//arr[i].value //태그의 값
+			if(arr[i].value == '') {
+				alert("필수 입력사항과 형식을 확인하세요");
+				arr[i].focus(); //포커스
+				return; //함수종료
+			}
+		}
+		*/
+		
+		//여기서 form을 submit
+		document.prodUpdate.action = "prodUpdate"; //action값 제어
+		document.prodUpdate.submit(); //폼 서브밋
+	}
+
+	
+	function prod_delete() {
+		this.event.preventDefault(); //고유이벤트 중지
+		
+		if(confirm("삭제후에는 복구가 불가 합니다. 그래도 삭제하시겠습니까?")) {
+			document.prodUpdate.action = "prodDelete"; //action값 제어
+			document.prodUpdate.submit(); //폼서브밋
+			
+		}
+		
+	}
+	
+	
+	
+	
+</script>
+
+
+
+
+</html>
