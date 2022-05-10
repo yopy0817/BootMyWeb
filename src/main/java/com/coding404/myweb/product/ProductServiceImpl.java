@@ -35,7 +35,8 @@ public class ProductServiceImpl implements ProductService {
 		DateTimeFormatter datetime = DateTimeFormatter.ofPattern("yyMMdd");
 		String date = LocalDateTime.now().format(datetime);
 	
-		File file = new File(uploadPath + "\\" + date ); //java.io (업로드 경로 \\ 폴더명 )
+//		File file = new File(uploadPath + "\\" + date ); //java.io (업로드 경로 \\ 폴더명 )
+		File file = new File(uploadPath + "/" + date ); //java.io (업로드 경로 \\ 폴더명 )
 		if(file.exists() == false ) { //폴더가 존재하면 true, 존재하지 않으면 false
 			file.mkdir(); //폴더가 생성
 		}
@@ -66,7 +67,9 @@ public class ProductServiceImpl implements ProductService {
 			String uuid = UUID.randomUUID().toString();
 			
 			//최종경로
-			String savename = uploadPath + "\\" + filepath + "\\" + uuid + "_" + filename;
+//			String savename = uploadPath + "\\" + filepath + "\\" + uuid + "_" + filename;
+			String savename = uploadPath + "/" + filepath + "/" + uuid + "_" + filename;
+			
 			
 			//업로드 진행
 			try {

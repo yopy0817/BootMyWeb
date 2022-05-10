@@ -72,7 +72,8 @@ public class AjaxController {
 		//System.out.println(filepath + "\\" + uuid + "_" + filename);
 		
 		
-		File file = new File(uploadpath + "\\" + filepath + "\\" + uuid + "_" + filename);
+//		File file = new File(uploadpath + "\\" + filepath + "\\" + uuid + "_" + filename);
+		File file = new File(uploadpath + "/" + filepath + "/" + uuid + "_" + filename);
 		
 		byte[] result = null;
 		try {
